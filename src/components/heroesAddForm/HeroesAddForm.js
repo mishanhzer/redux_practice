@@ -11,16 +11,12 @@ const HeroesAddForm = () => {
     const [heroDescr, setHeroDescr] = useState('');
     const [heroElement, setHeroElement] = useState('');
 
-    const {filters, filtersLoadingStatus} = useSelector(state => state); // вытаскиваем состояние filter и статус фильтров
+    const {filters, filtersLoadingStatus} = useSelector(state => state.filters); // теперь, чтобы вытащить filters, мы должны его вытаскивать из state.filters (добавилось новое состояние filters из за комбинирования редьюсеров)
     const dispatch = useDispatch(); // вытаскиваем dispatch из хука редакса
     const {request} = useHttp(); // вытаскиваем request из хука useHttp
 
-    // Тут аналогично моему примеру
     const onSubmitHandler = (e) => {
         e.preventDefault();
-        // Можно сделать и одинаковые названия состояний,
-        // хотел показать вам чуть нагляднее
-        // Генерация id через библиотеку
         const newHero = {
             id: uuidv4(),
             name: heroName,
@@ -28,9 +24,6 @@ const HeroesAddForm = () => {
             element: heroElement
         }
 
-        // Отправляем данные на сервер в формате JSON
-        // ТОЛЬКО если запрос успешен - отправляем персонажа в store
-        // Отправляем запрос - url, метод POST, body - JSON обьект нового персонажа - преобразовали JS обьект в JSON обьект
         request("http://localhost:3001/heroes", "POST", JSON.stringify(newHero))
             .then(res => console.log(res, 'Отправка успешна'))
             .then(dispatch(heroCreated(newHero))) // если успешно, то вызываем функцию из action - в reducers добавляем нового персонажа к списку всех героев и получается новое состояние из четырех героев и т.д

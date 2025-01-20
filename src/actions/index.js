@@ -1,3 +1,4 @@
+// Если у нас придет строка, то за счет модернизации dispatch строка сразу попадет внутрь обьекта в свойство type
 export const heroesFetching = () => {
     return {
         type: 'HEROES_FETCHING'

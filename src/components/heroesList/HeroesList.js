@@ -2,6 +2,7 @@ import {useHttp} from '../../hooks/http.hook';
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
+import { createSelector } from 'reselect' // Импортируем библиотеку
 
 import { heroesFetching, heroesFetched, heroesFetchingError, heroDeleted } from '../../actions';
 import HeroesListItem from "../heroesListItem/HeroesListItem";
@@ -9,26 +10,29 @@ import Spinner from '../spinner/Spinner';
 
 import './heroesList.scss';
 
-// Задача для этого компонента:
-// При клике на "крестик" идет удаление персонажа из общего состояния
-// Усложненная задача:
-// Удаление идет и с json файла при помощи метода DELETE
-
 const HeroesList = () => {
-    const filteredHeroes = useSelector(state => {
-        if (state.activeFilter === 'all') {
-            return state.heroes
-        } else {
-            return state.heroes.filter(hero => hero.element === state.activeFilter)
+    const filteredHeroesSelector = createSelector(
+        (state) => state.filters.activeFilter, 
+        (state) => state.heroes.heroes, 
+        (activeFilter, heroes) => { 
+            if (activeFilter === 'all') { 
+                return heroes
+            } else {
+                return heroes.filter(hero => hero.element === activeFilter)
+            }
         }
-    })
+    )
 
-    const heroesLoadingStatus = useSelector(state => state.heroesLoadingStatus); // аналогично вытаскиваем состояния (возвращаем обьект стейта и из него деструктуризируем два состояния)
+    const filteredHeroes = useSelector(filteredHeroesSelector) 
+    const heroesLoadingStatus = useSelector(state => state.heroes.heroesLoadingStatus);
     const dispatch = useDispatch();
     const {request} = useHttp();
 
-    useEffect(() => { // отправляем action загрузки персонажей
-        dispatch(heroesFetching());
+    useEffect(() => { 
+        // dispatch(heroesFetching());
+        // Мы значем, что в dispatch мы передаем обьект со свойством type и доп. полями, если нужно
+        // Но как сделать так, чтобы не было ошибки, если мы передадим туда строку (используем store enhancers)
+        dispatch('HEROES_FETCHING'); 
         request("http://localhost:3001/heroes")
             .then(data => dispatch(heroesFetched(data))) 
             .catch(() => dispatch(heroesFetchingError()))

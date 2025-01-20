@@ -1,6 +1,27 @@
-import { createStore } from 'redux';
-import reducer from '../reducers';
+import { createStore, combineReducers, compose, applyMiddleware } from 'redux'; // импортируем applyMiddleware
 
-const store = createStore(reducer, window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+import heroes from '../reducers/heroes'; 
+import filters from '../reducers/filters';
+
+
+const stringMiddleware = (store) => (next) => (action) => { // action => ... - функция, которую мы модернизируем
+    if (typeof action === 'string') { 
+        return next({
+            type: action
+        })
+    }
+    return next(action)
+}
+
+const store = createStore(
+    combineReducers({heroes, filters}), 
+    compose(
+        applyMiddleware(stringMiddleware),
+        window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    )
+    );
 
 export default store;
+
+
+

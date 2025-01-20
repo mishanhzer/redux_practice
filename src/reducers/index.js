@@ -4,16 +4,7 @@ const initialState = {
     filters: [],
     filtersLoadingStatus: 'idle', // добавим статус для фильтров
     activeFilter: 'all', // добавим активность
-    // Убираем состояние filteredHeroes (заменили на использолвание филтрации внутри useSelector)
 }
-
-// 1. Отфильровал героев относительно стандартного расположения класса active при загрузке персонажей
-// 2. фильтруем геров относительного того на какую кнопку мы нажали
-// 3. Фильтруем героев относительно нового массива (где мы добавили нового персонажа)
-// 4. Фильтруем героев относительного нового массива (где мы удаляем персонажа)
-
-// Вместо этого мы выносим всю филтрацию в использование ее внутри useSelector в компоненте HeroesList
-// В reducer мы оставляем только самые простые операции (назначение данных без условий)
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
@@ -69,6 +60,7 @@ const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 heroes: state.heroes.filter(item => item.id !== action.payload) // делаем аналогично
+                // И тут убираем фильтрацию
             }
         default: return state
     }

@@ -7,11 +7,10 @@ import { filtersFetching, filtersFetched, filtersFetchingError, activeFilterChan
 import Spinner from '../spinner/Spinner';
 
 const HeroesFilters = () => {
-    const {filters, filtersLoadingStatus, activeFilter} = useSelector(state => state); // вытаскиваем состояния из редакса
+    const {filters, filtersLoadingStatus, activeFilter} = useSelector(state => state.filters); 
     const dispatch = useDispatch();
     const {request} = useHttp();
 
-    // Запрос на сервер для получения фильтров и последовательной смены состояния
     useEffect(() => {
         dispatch(filtersFetching()); // отправляем action - филтры загружаются
         request("http://localhost:3001/filters") // запрос
