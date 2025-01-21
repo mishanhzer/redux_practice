@@ -1,5 +1,4 @@
-import { createStore, combineReducers, compose, applyMiddleware } from 'redux'; // импортируем applyMiddleware
-import { thunk as ReduxThunk } from "redux-thunk" // подключаем redux-thunk
+import { configureStore } from '@reduxjs/toolkit'; // импортируем configureStore
 
 import heroes from '../reducers/heroes'; 
 import filters from '../reducers/filters';
@@ -13,13 +12,12 @@ const stringMiddleware = (store) => (next) => (action) => {
     return next(action)
 }
 
-const store = createStore(
-    combineReducers({heroes, filters}), 
-    compose(
-        applyMiddleware(ReduxThunk, stringMiddleware), // добавляем redux thunk ко всем middleware
-        window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-    )
-    );
+const store = configureStore({ 
+    reducer: {heroes, filters}, // подключение редьюсеров (так же как в сombineReducers)
+    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(stringMiddleware), // подключение middleware - сначала встроенные middleware, а потом добавляем наш (middleware хранятся в массиве, concat используем, чтобы не мутировать массив)
+    devTools: process.env.NODE_ENV !== 'production', // подключение девтулзов (булевое значение) - если разработка, то подключить, если прод, то отключить
+})
+
 
 export default store;
 
