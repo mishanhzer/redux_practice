@@ -1,4 +1,17 @@
-// Если у нас придет строка, то за счет модернизации dispatch строка сразу попадет внутрь обьекта в свойство type
+export const fetchHeroes = (request) => (dispatch) => { 
+    dispatch(heroesFetching());  
+    request("http://localhost:3001/heroes")
+        .then(data => dispatch(heroesFetched(data))) 
+        .catch(() => dispatch(heroesFetchingError()))
+}
+
+export const fetchFilters = (request) => (dispatch) => {
+    dispatch(filtersFetching()); 
+    request("http://localhost:3001/filters") 
+        .then(data => dispatch(filtersFetched(data))) 
+        .catch(() => dispatch(filtersFetchingError()))
+}
+
 export const heroesFetching = () => {
     return {
         type: 'HEROES_FETCHING'
@@ -38,15 +51,25 @@ export const filtersFetchingError = () => {
     }
 }
 
-// если активный фильтр сменился, то в payload помещаем filter (all, wind, water и т.д)
-export const activeFilterChanged = (filter) => {
-    return {
-        type: 'ACTIVE_FILTER_CHANGED',
-        payload: filter
-    }
-}
+// export const activeFilterChanged = (filter) => {
+//     return {
+//         type: 'ACTIVE_FILTER_CHANGED',
+//         payload: filter
+//     }
+// }
 
-// Создание нового персонажа - если персонаж создался, то в payload помещаем нового персонажа
+// Добавляем функцию (потому что с помощью thunk, action может теперь возвращать и функции)
+// теперь этот action creator будет возвращать функцию, которая в себя принимает dispatch (если мы юзаем thunk middleware, то dispatch приходит сюда автоматически)
+export const activeFilterChanged = (filter) => (dispatch) => {
+    setTimeout(() => { // используем setTimeout
+        dispatch({ // т.к у нас есть dispatch, которйы приходит в аргумент автоматически - используем его и передаем в него наш обьект
+            type: 'ACTIVE_FILTER_CHANGED',
+            payload: filter
+        })
+    }, 1000)
+}
+// Мы возвращаем функцию, которая через 1 секунду будет запускать нужным нам dispatch
+
 export const heroCreated = (hero) => {
     return {
         type: 'HERO_CREATED',

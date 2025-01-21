@@ -2,9 +2,9 @@ import {useHttp} from '../../hooks/http.hook';
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
-import { createSelector } from 'reselect' // Импортируем библиотеку
+import { createSelector } from 'reselect'
 
-import { heroesFetching, heroesFetched, heroesFetchingError, heroDeleted } from '../../actions';
+import { fetchHeroes, heroDeleted } from '../../actions'; 
 import HeroesListItem from "../heroesListItem/HeroesListItem";
 import Spinner from '../spinner/Spinner';
 
@@ -29,13 +29,7 @@ const HeroesList = () => {
     const {request} = useHttp();
 
     useEffect(() => { 
-        // dispatch(heroesFetching());
-        // Мы значем, что в dispatch мы передаем обьект со свойством type и доп. полями, если нужно
-        // Но как сделать так, чтобы не было ошибки, если мы передадим туда строку (используем store enhancers)
-        dispatch('HEROES_FETCHING'); 
-        request("http://localhost:3001/heroes")
-            .then(data => dispatch(heroesFetched(data))) 
-            .catch(() => dispatch(heroesFetchingError()))
+        dispatch(fetchHeroes(request)); 
     }, []);
 
     const onDelete = useCallback((id) => {
