@@ -1,7 +1,7 @@
-import { configureStore } from '@reduxjs/toolkit'; // импортируем configureStore
+import { configureStore } from '@reduxjs/toolkit';
 
-import heroes from '../reducers/heroes'; 
-import filters from '../reducers/filters';
+import heroes from '../components/heroesList/heroesSlice'; 
+import filters from '../components/heroesFilters/filtersSlice'
 
 const stringMiddleware = (store) => (next) => (action) => { 
     if (typeof action === 'string') { 
@@ -13,11 +13,10 @@ const stringMiddleware = (store) => (next) => (action) => {
 }
 
 const store = configureStore({ 
-    reducer: {heroes, filters}, // подключение редьюсеров (так же как в сombineReducers)
-    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(stringMiddleware), // подключение middleware - сначала встроенные middleware, а потом добавляем наш (middleware хранятся в массиве, concat используем, чтобы не мутировать массив)
-    devTools: process.env.NODE_ENV !== 'production', // подключение девтулзов (булевое значение) - если разработка, то подключить, если прод, то отключить
+    reducer: {heroes, filters}, // подключение наших срезов
+    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(stringMiddleware), 
+    devTools: process.env.NODE_ENV !== 'production', 
 })
-
 
 export default store;
 

@@ -1,10 +1,11 @@
-import {useHttp} from '../../hooks/http.hook';
+import { useHttp } from '../../hooks/http.hook';
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
 import { createSelector } from 'reselect'
 
-import { fetchHeroes, heroDeleted } from '../../actions'; 
+import { fetchHeroes } from '../../actions'; // импортируем комплексный action creator из actions
+import { heroDeleted } from './heroesSlice'; // импортиурем action creator из среза
 import HeroesListItem from "../heroesListItem/HeroesListItem";
 import Spinner from '../spinner/Spinner';
 
@@ -47,7 +48,6 @@ const HeroesList = () => {
     }
 
     const renderHeroesList = (arr) => {
-        // Если массив пустой, то добавим анимацию с текстом, что героев пока нет
         if (arr.length === 0) {
             return (
                 <CSSTransition

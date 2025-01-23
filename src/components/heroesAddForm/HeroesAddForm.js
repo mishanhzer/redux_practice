@@ -3,17 +3,16 @@ import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 
-import { heroCreated } from '../../actions';
+import { heroCreated } from '../heroesList/heroesSlice'; // импортиурем action creator теперь из среза
 
 const HeroesAddForm = () => {
-    // Состояния для контроля формы
     const [heroName, setHeroName] = useState('');
     const [heroDescr, setHeroDescr] = useState('');
     const [heroElement, setHeroElement] = useState('');
 
-    const {filters, filtersLoadingStatus} = useSelector(state => state.filters); // теперь, чтобы вытащить filters, мы должны его вытаскивать из state.filters (добавилось новое состояние filters из за комбинирования редьюсеров)
-    const dispatch = useDispatch(); // вытаскиваем dispatch из хука редакса
-    const {request} = useHttp(); // вытаскиваем request из хука useHttp
+    const {filters, filtersLoadingStatus} = useSelector(state => state.filters); 
+    const dispatch = useDispatch(); 
+    const {request} = useHttp(); 
 
     const onSubmitHandler = (e) => {
         e.preventDefault();
@@ -26,29 +25,25 @@ const HeroesAddForm = () => {
 
         request("http://localhost:3001/heroes", "POST", JSON.stringify(newHero))
             .then(res => console.log(res, 'Отправка успешна'))
-            .then(dispatch(heroCreated(newHero))) // если успешно, то вызываем функцию из action - в reducers добавляем нового персонажа к списку всех героев и получается новое состояние из четырех героев и т.д
+            .then(dispatch(heroCreated(newHero))) 
             .catch(err => console.log(err));
 
-        // Очищаем форму после отправки
         setHeroName('');
         setHeroDescr('');
         setHeroElement('');
     }
 
-    const renderFilters = (filters, status) => { // filters и status - состояния редакса
-        if (status === "loading") { // если статус загрузки, то вернем этот option
+    const renderFilters = (filters, status) => { 
+        if (status === "loading") { 
             return <option>Загрузка элементов</option>
         } else if (status === "error") {
             return <option>Ошибка загрузки</option>
         }
         
-        // Если фильтры есть, то рендерим их
-        if (filters && filters.length > 0) { // зачем использовать оператор И, если можно просто заюзать filters.length > 0
+        if (filters && filters.length > 0) { 
             return filters.map(({name, label}) => { 
-                // Один из фильтров нам тут не нужен
                 // eslint-disable-next-line
-                if (name === 'all') return; // если name равен all, то остановим код
-                // если name другое, то вернем option
+                if (name === 'all') return; 
                 return <option key={name} value={name}>{label}</option>
             })
         }

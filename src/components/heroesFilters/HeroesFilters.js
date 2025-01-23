@@ -3,7 +3,8 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import classNames from 'classnames';
 
-import { fetchFilters, activeFilterChanged } from '../../actions';
+import { fetchFilters } from '../../actions';
+import { activeFilterChanged } from './filtersSlice'
 import Spinner from '../spinner/Spinner';
 
 const HeroesFilters = () => {
@@ -15,9 +16,9 @@ const HeroesFilters = () => {
         dispatch(fetchFilters(request));
     }, []);
 
-    if (filtersLoadingStatus === "loading") { // если статус филтров загрузка, то помещаем спинер
+    if (filtersLoadingStatus === "loading") { 
         return <Spinner/>;
-    } else if (filtersLoadingStatus === "error") { // если ошибка, то вернем кусочек верстки
+    } else if (filtersLoadingStatus === "error") { 
         return <h5 className="text-center mt-5">Ошибка загрузки</h5>
     }
 
@@ -36,12 +37,12 @@ const HeroesFilters = () => {
                         key={name} 
                         id={name} 
                         className={btnClass}
-                        onClick={() => dispatch(activeFilterChanged(name))} // отправляем action через клик и помещаем туда name (all, water, fire и т.д)
+                        onClick={() => dispatch(activeFilterChanged(name))} 
                         >{label}</button>
         })
     }
 
-    const elements = renderFilters(filters); // элементы с кнопками (которые создали на основе перебора массива filters)
+    const elements = renderFilters(filters); 
 
     return (
         <div className="card shadow-lg mt-4">
