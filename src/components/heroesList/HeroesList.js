@@ -2,35 +2,22 @@ import { useHttp } from '../../hooks/http.hook';
 import { useEffect, useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { CSSTransition, TransitionGroup} from 'react-transition-group';
-import { createSelector } from 'reselect'
 
-import { fetchHeroes } from '../../actions'; // импортируем комплексный action creator из actions
-import { heroDeleted } from './heroesSlice'; // импортиурем action creator из среза
+import { heroDeleted, fetchHeroes, filteredHeroesSelector } from './heroesSlice'; 
+
 import HeroesListItem from "../heroesListItem/HeroesListItem";
 import Spinner from '../spinner/Spinner';
 
 import './heroesList.scss';
 
 const HeroesList = () => {
-    const filteredHeroesSelector = createSelector(
-        (state) => state.filters.activeFilter, 
-        (state) => state.heroes.heroes, 
-        (activeFilter, heroes) => { 
-            if (activeFilter === 'all') { 
-                return heroes
-            } else {
-                return heroes.filter(hero => hero.element === activeFilter)
-            }
-        }
-    )
-
     const filteredHeroes = useSelector(filteredHeroesSelector) 
     const heroesLoadingStatus = useSelector(state => state.heroes.heroesLoadingStatus);
     const dispatch = useDispatch();
     const {request} = useHttp();
 
     useEffect(() => { 
-        dispatch(fetchHeroes(request)); 
+        dispatch(fetchHeroes()); 
     }, []);
 
     const onDelete = useCallback((id) => {
@@ -40,7 +27,6 @@ const HeroesList = () => {
             .catch(err => console.log(err));
     }, [request]); 
 
-    // Аналогично HeroesFilters
     if (heroesLoadingStatus === "loading") {
         return <Spinner/>;
     } else if (heroesLoadingStatus === "error") {
@@ -58,7 +44,6 @@ const HeroesList = () => {
             )
         }
 
-        // Перебираем массив, добавляем анимацию, и возвращаем компонент списка героев, куда прокидываем метод по удалению персонажа
         return arr.map(({id, ...props}) => {
             return (
                 <CSSTransition 
@@ -71,7 +56,7 @@ const HeroesList = () => {
         })
     }
 
-    const elements = renderHeroesList(filteredHeroes); // в elements помещаем компоненты, которые вернули из функции renderHeroesList
+    const elements = renderHeroesList(filteredHeroes);
     return (
         <TransitionGroup component="ul">
             {elements}

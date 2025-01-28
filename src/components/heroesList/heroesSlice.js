@@ -1,31 +1,59 @@
-import { createSlice } from "@reduxjs/toolkit"; // импортируем функцию createSlice
+import { createSlice, createAsyncThunk, createEntityAdapter, createSelector } from "@reduxjs/toolkit"; 
+import { useHttp } from '../../hooks/http.hook'; 
 
-// Главное не забывать, что это тот же редакс - внутри createSlice на самом деле все тот же паттерн - вызываются функции dispatch с какими то action, они попадают в редьюсер и редьюсер меняет наш стор (просто теперь он обернут в функцию createSlice и делает использование редакса более удобным)
+const heroesAdapter = createEntityAdapter() // создаем адаптер
 
-const initialState = {
-    heroes: [],
+const initialState = heroesAdapter.getInitialState({ // cоздаем начальное значение из адаптера
     heroesLoadingStatus: 'idle',
-}
+})
+
+export const fetchHeroes = createAsyncThunk( 
+    'heroes/fetchHeroes', 
+    () => { 
+        const {request} = useHttp(); 
+        return request("http://localhost:3001/heroes") 
+    }
+)
 
 const heroesSlice = createSlice({ 
     name: 'heroes', 
-    initialState, 
-    reducers: { // создаем action creator и подкрепляем под них дейтсвия (обьединение action и reducer)
-        heroesFetching: state => {state.heroesLoadingStatus = 'loading'}, // не возвращаем, чтобы не отключить immer
-        heroesFetched: (state, action) => { 
-            state.heroesLoadingStatus = 'idle'
-            state.heroes = action.payload 
-        },
-        heroesFetchingError: state => {state.heroesLoadingStatus = 'error'},
-        heroCreated: (state, action) => {state.heroes.push(action.payload) },
-        heroDeleted: (state, action) => {state.heroes = state.heroes.filter(item => item.id !== action.payload)}
+    initialState, // передаем начальное состояние из адаптера
+    reducers: { 
+        heroCreated: (state, action) => {heroesAdapter.addOne(state, action.payload)}, // используем метод адаптера по добавлению сущности - аргументы (стейт, данные)
+        heroDeleted: (state, action) => {heroesAdapter.removeOne(state, action.payload)} 
     },
+    extraReducers: (builder) => { 
+        builder 
+            .addCase(fetchHeroes.pending, state => {state.heroesLoadingStatus = 'loading'}) 
+            .addCase(fetchHeroes.fulfilled, (state, action) => { 
+                state.heroesLoadingStatus = 'idle' // тут не юзаем адаптер, потому что он нам тут не нужен
+                // используем метод адаптера установления всех сущностей (тут внимательно, потому что будет обьект в обьекте - entities)
+                heroesAdapter.setAll(state, action.payload) // заменили эту строку код - state.heroes = action.payload 
+            })
+            .addCase(fetchHeroes.rejected, state => {state.heroesLoadingStatus = 'error'})
+            .addDefaultCase(() => {}) 
+    }
 })
 
-const {actions, reducer} = heroesSlice // вытаскиваем сущности
+const {actions, reducer} = heroesSlice 
 
 export default reducer 
-export const { // вытаскиваем action creatorы
+
+const {selectAll} = heroesAdapter.getSelectors(state => state.heroes) // экспортируем селектор адаптера (вытаскиваем кусочек стейта - переделав его из обьекта в массив)
+
+export const filteredHeroesSelector = createSelector(
+    (state) => state.filters.activeFilter, 
+    selectAll, // подставляем кусочек, который лежит в selectAll - (state) => state.heroes
+    (activeFilter, heroes) => { 
+        if (activeFilter === 'all') { 
+            return heroes
+        } else {
+            return heroes.filter(hero => hero.element === activeFilter)
+        }
+    }
+)
+
+export const { 
     heroesFetching,
     heroesFetched,
     heroesFetchingError,
