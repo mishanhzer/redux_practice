@@ -1,24 +1,22 @@
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore } from "@reduxjs/toolkit";
 
-import heroes from '../components/heroesList/heroesSlice'; 
-import filters from '../components/heroesFilters/filtersSlice'
+import filters from "../components/heroesFilters/filtersSlice";
+import { apiSlice } from "../api/apiSlice";
 
-const stringMiddleware = (store) => (next) => (action) => { 
-    if (typeof action === 'string') { 
-        return next({
-            type: action
-        })
-    }
-    return next(action)
-}
+const stringMiddleware = (store) => (next) => (action) => {
+  if (typeof action === "string") {
+    return next({
+      type: action,
+    });
+  }
+  return next(action);
+};
 
-const store = configureStore({ 
-    reducer: {heroes, filters}, // подключение наших срезов
-    middleware: getDefaultMiddleware => getDefaultMiddleware().concat(stringMiddleware), 
-    devTools: process.env.NODE_ENV !== 'production', 
-})
+const store = configureStore({
+  reducer: { filters, [apiSlice.reducerPath]: apiSlice.reducer },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat(stringMiddleware, apiSlice.middleware),
+  devTools: process.env.NODE_ENV !== "production",
+});
 
 export default store;
-
-
-

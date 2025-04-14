@@ -1,61 +1,63 @@
-import {useHttp} from '../../hooks/http.hook';
-import { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import classNames from 'classnames';
-import store from '../../store/index' 
+import { useHttp } from "../../hooks/http.hook";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import classNames from "classnames";
+import store from "../../store/index";
 
-import { activeFilterChanged, fetchFilters, selectAll } from './filtersSlice' // вытаскиваем selectAll из среза фильтров (а не из среза героев)
-import Spinner from '../spinner/Spinner';
+import { activeFilterChanged, fetchFilters, selectAll } from "./filtersSlice";
+import Spinner from "../spinner/Spinner";
 
 const HeroesFilters = () => {
-    const {filtersLoadingStatus, activeFilter} = useSelector(state => state.filters); 
-    const filters = selectAll(store.getState()) // получаем наши данные фильтров (переделанный из обьекта массив)
-    const dispatch = useDispatch();
-    const {request} = useHttp();
+  const { filtersLoadingStatus, activeFilter } = useSelector(
+    (state) => state.filters
+  );
+  const filters = selectAll(store.getState());
+  const dispatch = useDispatch();
+  const { request } = useHttp();
 
-    useEffect(() => {
-        dispatch(fetchFilters());
-    }, []);
+  useEffect(() => {
+    dispatch(fetchFilters());
+  }, []);
 
-    if (filtersLoadingStatus === "loading") { 
-        return <Spinner/>;
-    } else if (filtersLoadingStatus === "error") { 
-        return <h5 className="text-center mt-5">Ошибка загрузки</h5>
+  if (filtersLoadingStatus === "loading") {
+    return <Spinner />;
+  } else if (filtersLoadingStatus === "error") {
+    return <h5 className="text-center mt-5">Ошибка загрузки</h5>;
+  }
+
+  const renderFilters = (arr) => {
+    if (arr.length === 0) {
+      return <h5 className="text-center mt-5">Фильтры не найдены</h5>;
     }
 
-    
-    const renderFilters = (arr) => {
-        if (arr.length === 0) {
-            return <h5 className="text-center mt-5">Фильтры не найдены</h5>
-        }
+    return arr.map(({ name, className, label }) => {
+      const btnClass = classNames("btn", className, {
+        active: name === activeFilter,
+      });
 
-        return arr.map(({name, className, label}) => {
-            const btnClass = classNames('btn', className, {
-                'active': name === activeFilter
-            });
+      return (
+        <button
+          key={name}
+          id={name}
+          className={btnClass}
+          onClick={() => dispatch(activeFilterChanged(name))}
+        >
+          {label}
+        </button>
+      );
+    });
+  };
 
-            return <button 
-                        key={name} 
-                        id={name} 
-                        className={btnClass}
-                        onClick={() => dispatch(activeFilterChanged(name))} 
-                        >{label}</button>
-        })
-    }
+  const elements = renderFilters(filters);
 
-    const elements = renderFilters(filters); // используем данные массива
-
-    return (
-        <div className="card shadow-lg mt-4">
-            <div className="card-body">
-                <p className="card-text">Отфильтруйте героев по элементам</p>
-                <div className="btn-group">
-                    {elements}
-                </div>
-            </div>
-        </div>
-    )
-}
+  return (
+    <div className="card shadow-lg mt-4">
+      <div className="card-body">
+        <p className="card-text">Отфильтруйте героев по элементам</p>
+        <div className="btn-group">{elements}</div>
+      </div>
+    </div>
+  );
+};
 
 export default HeroesFilters;
-
